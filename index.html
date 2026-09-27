@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <title>Kentour — Open Source Intelligence</title>
+  <meta name="description" content="Легальный OSINT, проверка информации и помощь мирным людям. Минималистичный адаптер проекта Kentour.">
+  <style>
+    /* ----- RESET & BASE ----- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: #0a0a0a; /* глубокий чёрный, почти без синевы */
+      color: #f0f0f0;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      line-height: 1.5;
+      font-weight: 400;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 0 1.25rem;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Контейнер для контента — ограничиваем ширину, но оставляем воздух */
+    .wrapper {
+      width: 100%;
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 1.5rem 0 2.5rem;
+    }
+
+    /* ----- ТИПОГРАФИКА ----- */
+    h1, h2, h3 {
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    h1 {
+      font-size: clamp(3.5rem, 12vw, 6rem);
+      line-height: 1.1;
+      color: #fff;
+      margin-bottom: 0.25rem;
+    }
+
+    h2 {
+      font-size: 1.75rem;
+      margin-bottom: 2rem;
+      color: #fff;
+      position: relative;
+      display: inline-block;
+    }
+
+    /* тонкий красный маркер под заголовком секции */
+    h2::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: -0.5rem;
+      width: 2.5rem;
+      height: 3px;
+      background-color: #e63946; /* сдержанный красный */
+    }
+
+    .subhead {
+      font-size: 1.35rem;
+      font-weight: 400;
+      color: #b0b0b0;
+      letter-spacing: 0.02em;
+      margin-bottom: 0.5rem;
+    }
+
+    .tagline {
+      font-size: 1.2rem;
+      color: #d0d0d0;
+      margin-bottom: 2.5rem;
+    }
+
+    /* ----- КНОПКИ ----- */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #e63946; /* красный акцент */
+      color: #fff;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1.1rem;
+      padding: 1rem 2.25rem;
+      border-radius: 60px; /* современные скругления */
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.2s ease, transform 0.1s ease;
+      letter-spacing: 0.01em;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      box-shadow: 0 8px 20px rgba(230, 57, 70, 0.15);
+      line-height: 1.2;
+    }
+
+    .btn:hover,
+    .btn:focus-visible {
+      background-color: #c52834; /* чуть темнее при наведении */
+      outline: none;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    /* для финального призыва — более крупная кнопка */
+    .btn-large {
+      font-size: 1.2rem;
+      padding: 1.15rem 2.75rem;
+    }
+
+    /* ----- СЕКЦИИ ----- */
+    section {
+      margin-bottom: 5rem;
+    }
+
+    /* первый экран — особая компоновка */
+    .hero {
+      margin-top: 2rem;
+      margin-bottom: 5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .hero .btn {
+      margin-top: 1.5rem;
+    }
+
+    /* ----- КАРТОЧКИ УСЛУГ ----- */
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+
+    .service-card {
+      background-color: #111111; /* почти чёрный, с лёгким отличием от фона */
+      border: 1px solid #222;
+      border-radius: 24px;
+      padding: 2rem 1.75rem;
+      transition: border-color 0.2s ease, background-color 0.2s;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .service-card:hover {
+      border-color: #333;
+      background-color: #141414;
+    }
+
+    .service-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 1.25rem;
+      letter-spacing: -0.01em;
+    }
+
+    .price-list {
+      list-style: none;
+      margin-bottom: 1.25rem;
+    }
+
+    .price-list li {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid #222;
+      font-size: 1.1rem;
+    }
+
+    .price-list li:last-child {
+      border-bottom: none;
+    }
+
+    .price-label {
+      color: #b0b0b0;
+    }
+
+    .price-value {
+      font-weight: 600;
+      color: #fff;
+      background-color: #1e1e1e;
+      padding: 0.1rem 0.7rem;
+      border-radius: 30px;
+      font-size: 1rem;
+      border: 1px solid #2a2a2a;
+    }
+
+    .note {
+      font-size: 0.9rem;
+      color: #888;
+      margin-top: auto;
+      padding-top: 0.75rem;
+      border-top: 1px dashed #2a2a2a;
+      font-style: normal;
+    }
+
+    /* ----- БЛОК ПРИНЦИПОВ ----- */
+    .principles-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      margin-top: 0.5rem;
+    }
+
+    .principles-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      font-size: 1.1rem;
+      color: #d0d0d0;
+    }
+
+    .principles-list li::before {
+      content: '';
+      display: inline-block;
+      width: 0.5rem;
+      height: 0.5rem;
+      background-color: #e63946; /* красный маркер */
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 0.55rem;
+    }
+
+    /* ----- ФИНАЛЬНЫЙ ПРИЗЫВ ----- */
+    .final-cta {
+      background-color: #0f0f0f;
+      border: 1px solid #1f1f1f;
+      border-radius: 32px;
+      padding: 3rem 2rem;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+      margin-top: 2rem;
+      margin-bottom: 3rem;
+    }
+
+    .final-cta p {
+      font-size: 1.6rem;
+      font-weight: 500;
+      color: #fff;
+      max-width: 600px;
+      line-height: 1.3;
+    }
+
+    /* ----- ПОДВАЛ ----- */
+    footer {
+      text-align: center;
+      padding: 2rem 0 1rem;
+      color: #666;
+      font-size: 0.95rem;
+      border-top: 1px solid #1a1a1a;
+      margin-top: 1rem;
+    }
+
+    /* ----- АДАПТИВНОСТЬ ----- */
+    @media (max-width: 600px) {
+      body {
+        padding: 0 1rem;
+      }
+
+      .wrapper {
+        padding: 1rem 0 2rem;
+      }
+
+      h1 {
+        font-size: 3.2rem;
+      }
+
+      .subhead {
+        font-size: 1.2rem;
+      }
+
+      .tagline {
+        font-size: 1.1rem;
+      }
+
+      h2 {
+        font-size: 1.6rem;
+        margin-bottom: 1.75rem;
+      }
+
+      .btn {
+        width: 100%;
+        padding: 0.95rem 1.5rem;
+      }
+
+      .service-card {
+        padding: 1.75rem 1.25rem;
+      }
+
+      .price-list li {
+        font-size: 1rem;
+      }
+
+      .price-value {
+        font-size: 0.95rem;
+      }
+
+      .final-cta {
+        padding: 2rem 1.25rem;
+      }
+
+      .final-cta p {
+        font-size: 1.35rem;
+      }
+
+      .principles-list li {
+        font-size: 1rem;
+      }
+
+      section {
+        margin-bottom: 3.5rem;
+      }
+
+      .hero {
+        margin-bottom: 3.5rem;
+      }
+    }
+
+    /* Очень маленькие экраны */
+    @media (max-width: 380px) {
+      h1 {
+        font-size: 2.8rem;
+      }
+
+      .btn {
+        font-size: 1rem;
+      }
+    }
+
+    /* Убираем синий цвет тапа на мобильных */
+    a, button {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Фокус для доступности */
+    a:focus-visible,
+    button:focus-visible {
+      outline: 2px solid #e63946;
+      outline-offset: 3px;
+    }
+
+    /* Дополнительный отступ для якорных ссылок, если понадобятся */
+    html {
+      scroll-behavior: smooth;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <!-- 1. ПЕРВЫЙ ЭКРАН -->
+    <section class="hero">
+      <h1>Kentour</h1>
+      <div class="subhead">Open Source Intelligence</div>
+      <p class="tagline">Учимся и делимся вместе с вами</p>
+      <a href="https://adapterofkentour.t.me" class="btn" target="_blank" rel="noopener noreferrer">Перейти в Telegram</a>
+    </section>
+
+    <!-- 2. БЛОК УСЛУГ -->
+    <section>
+      <h2>Услуги</h2>
+      <div class="services-grid">
+        <!-- Карточка: Физические номера -->
+        <div class="service-card">
+          <div class="service-title">Физические номера</div>
+          <ul class="price-list">
+            <li>
+              <span class="price-label">+1</span>
+              <span class="price-value">60 ₽</span>
+            </li>
+            <li>
+              <span class="price-label">+880</span>
+              <span class="price-value">60 ₽</span>
+            </li>
+          </ul>
+          <!-- нет дополнительной пометки, всё точно по ТЗ -->
+        </div>
+
+        <!-- Карточка: Реклама -->
+        <div class="service-card">
+          <div class="service-title">Реклама</div>
+          <ul class="price-list">
+            <li>
+              <span class="price-label">1 день</span>
+              <span class="price-value">50 ⭐</span>
+            </li>
+          </ul>
+          <div class="note">Условия размещения уточняйте в Telegram</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. БЛОК ПРИНЦИПОВ РАБОТЫ -->
+    <section>
+      <h2>Принципы работы</h2>
+      <ul class="principles-list">
+        <li>Используем только законные и открытые источники.</li>
+        <li>Не публикуем персональные данные и адреса частных лиц.</li>
+        <li>Не помогаем с преследованием, взломом и причинением вреда.</li>
+        <li>Учитываем безопасность людей, которым требуется помощь.</li>
+      </ul>
+    </section>
+
+    <!-- 4. ФИНАЛЬНЫЙ ПРИЗЫВ -->
+    <section>
+      <div class="final-cta">
+        <p>Есть вопрос или нужна информация об услугах?</p>
+        <a href="https://adapterofkentour.t.me" class="btn btn-large" target="_blank" rel="noopener noreferrer">Связаться в Telegram</a>
+      </div>
+    </section>
+
+    <!-- 5. ПОДВАЛ -->
+    <footer>
+      Kentour · Владелец: exet3rno
+    </footer>
+  </div>
+</body>
+</html>
